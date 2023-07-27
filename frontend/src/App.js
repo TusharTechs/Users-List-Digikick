@@ -1,16 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import UserForm from './Components/UserForm';
-import UserList from './Components/UserList';
-import UpdateDetails from './Components/UpdateDetails';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import UserList from "./Components/UserList";
+import UpdateDetails from "./Components/UpdateDetails";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<UserForm/>} />
-        <Route path="/users" element={<UserList/>} />
-        <Route path="/users/:userId" element = {<UpdateDetails />}/>
+        <Route path="/" element={<UserList />} />
+        <Route path="/:id" element={<UpdateDetails />} />
       </Routes>
     </Router>
   );

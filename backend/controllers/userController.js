@@ -84,25 +84,12 @@ exports.getSingleUserById = async (req, res) => {
 };
 
 // UPDATE A USER BY ID
+// UPDATE A USER BY ID
 exports.updateUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data } = req.body;
-    console.log(req.body);
-
-    const updatedUserData = await userModel.findOneAndUpdate(
-      {
-        _id: id,
-      },
-      {
-        $set: {
-          ...data,
-        },
-      },
-      {
-        new: true,
-      }
-    );
+    const data = req.body;
+    const updatedUserData = await userModel.findByIdAndUpdate(id, data);
 
     if (!updatedUserData) {
       return res.status(404).json({
@@ -111,12 +98,11 @@ exports.updateUserById = async (req, res) => {
       });
     }
 
-
     return res.status(200).json({
       success: true,
-      data: updatedUserData,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "An error occurred while updating the user.",
