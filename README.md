@@ -109,3 +109,12 @@ The frontend will be accessible at http://localhost:3000.
 
 ## Conclusion
 The User-List-Digikick project provides a user-friendly interface for managing users with features like signup, login, user list display, search, sorting, and pagination. The backend securely handles user data with authentication using JWT tokens. With this documentation, you are now ready to use and contribute to the User-List-Digikick project on GitHub. Happy coding!
+
+## Contributing
+Contributions to the Project are welcome! If you find any issues or have suggestions for improvements, please feel free to open an issue or create a pull request.
+
+## License
+The Note Making App is open-source software licensed under the [MIT License](LICENSE).
+
+## Contact
+For additional information or inquiries about the Users-List-Digikick Project, you can contact me at tusharaggarwal274@gmail.com.
