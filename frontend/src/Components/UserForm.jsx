@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
-import { TextField, Button, Container, Grid, Box, Typography } from '@mui/material';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import { Box, Container, Grid, Typography, TextField, Button } from "@mui/material";
 
-const UserForm = () => {
-  const navigate = useNavigate();
+const UserForm = (props) => {
+  const { fetchUsers } = props;
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    location: '',
-    contact: '',
-    image: '',
+    username: "",
+    email: "",
+    password: "",
+    location: "",
+    contact: "",
+    image: "",
   });
 
   const handleChange = (event) => {
@@ -23,20 +22,21 @@ const UserForm = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post('/users', { data: formData });
+      const response = await axios.post("/users", { data: formData });
       console.log(response.data);
 
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem("token", response.data.token);
 
       setFormData({
-        username: '',
-        email: '',
-        password: '',
-        location: '',
-        contact: '',
-        image: '',
+        username: "",
+        email: "",
+        password: "",
+        location: "",
+        contact: "",
+        image: "",
       });
-      navigate('/users');
+
+      fetchUsers();
     } catch (error) {
       console.error(error.response.data);
     }
@@ -51,7 +51,7 @@ const UserForm = () => {
       minHeight="100vh"
     >
       <Container maxWidth="sm">
-      <Typography variant="h4" align="center" gutterBottom>
+        <Typography variant="h4" align="center" gutterBottom>
           Welcome to DigiKick. Register Below!
         </Typography>
         <form onSubmit={handleSubmit}>
@@ -118,7 +118,12 @@ const UserForm = () => {
             </Grid>
           </Grid>
           <center>
-            <Button variant="contained" color="primary" type="submit" sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              sx={{ mt: 2 }}
+            >
               Submit
             </Button>
           </center>

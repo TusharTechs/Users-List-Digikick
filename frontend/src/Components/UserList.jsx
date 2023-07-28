@@ -1,24 +1,56 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  TextField,
-  Button,
   Container,
   Grid,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
+  Typography
 } from "@mui/material";
-import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+
 import { useNavigate } from "react-router-dom";
+import UserCard from "./UserCard";
+import UserSearch from "./UserSearch";
+import UserForm from "./UserForm";
+import UserPagination from "./UserPagination";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
   const [isAuth, setIsAuth] = useState(false);
   const [isLoading, setisLoading] = useState(true);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [sortCriteria, setSortCriteria] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const usersPerPage = 9;
   const navigate = useNavigate();
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Function to handle search
+  const handleSearch = (searchTerm) => {
+    setSearchTerm(searchTerm);
+    if (searchTerm.trim() === "") {
+      setFilteredUsers([]);
+    } else {
+      const filteredUsers = users.filter((user) =>
+        user.username.toLowerCase().includes(searchTerm.trim().toLowerCase())
+      );
+      setFilteredUsers(filteredUsers);
+    }
+  };
+
+  // Function to handle sorting
+  const handleSort = (criteria) => {
+    if (criteria === sortCriteria) {
+      setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+    } else {
+      setSortCriteria(criteria);
+      setSortOrder("asc");
+    }
+  };
 
   // Function to handle edit actions
   const handleEdit = (user) => {
@@ -61,6 +93,35 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    const sortedUsers = [...users].sort((a, b) => {
+      if (sortCriteria) {
+        const valA = a[sortCriteria].toLowerCase();
+        const valB = b[sortCriteria].toLowerCase();
+        if (sortOrder === "asc") {
+          return valA.localeCompare(valB);
+        } else {
+          return valB.localeCompare(valA);
+        }
+      }
+      return 0;
+    });
+
+    // Update the filtered users list
+    if (searchTerm.trim() === "") {
+      setFilteredUsers(sortedUsers);
+    } else {
+      const filteredUsers = sortedUsers.filter((user) =>
+        user.username.toLowerCase().includes(searchTerm.trim().toLowerCase())
+      );
+      setFilteredUsers(filteredUsers);
+    }
+  }, [sortCriteria, sortOrder, users, searchTerm]);
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
   return isLoading ? (
     <>Loading...</>
   ) : (
@@ -70,20 +131,47 @@ const UserList = () => {
           <h2>
             <center>Users</center>
           </h2>
+          <UserSearch handleSearch={handleSearch} handleSort={handleSort} />
           <Container maxWidth="lg">
             <Grid container spacing={2}>
-              {users.map((user) => (
-                <Grid item xs={12} sm={6} md={4} key={user._id}>
-                  <UserCard
-                    username={user.username}
-                    image={user.image}
-                    onEdit={() => handleEdit(user)}
-                    onDelete={() => handleDelete(user._id)} // Add the missing parenthesis here
-                  />
+              {currentUsers.length > 0 ? (
+                currentUsers.map((user) => (
+                  <Grid item xs={12} sm={6} md={4} key={user._id}>
+                    <UserCard
+                      username={user.username}
+                      image={user.image}
+                      onEdit={() => handleEdit(user)}
+                      onDelete={() => handleDelete(user._id)}
+                    />
+                  </Grid>
+                ))
+              ) : (
+                <Grid item xs={12} md={12}>
+                  <Typography variant="body1" align="center">
+                    No users found.
+                  </Typography>
                 </Grid>
-              ))}
+              )}
             </Grid>
           </Container>
+          <div
+            style={{
+              position: "fixed",
+              bottom: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "#fff",
+              padding: "10px",
+              borderRadius: "4px",
+              boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <UserPagination
+              users={filteredUsers}
+              usersPerPage={usersPerPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
         </>
       ) : (
         <UserForm fetchUsers={fetchUsers} />
@@ -92,174 +180,4 @@ const UserList = () => {
   );
 };
 
-const UserCard = ({ username, image, onEdit, onDelete }) => {
-  return (
-    <Card>
-      <div style={{ position: "relative" }}>
-        <span
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            zIndex: 1,
-            cursor: "pointer",
-          }}
-          onClick={onEdit}
-        >
-          <AiOutlineEdit size={24} />
-        </span>
-        <span
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 30,
-            zIndex: 1,
-            cursor: "pointer",
-          }}
-          onClick={onDelete}
-        >
-          <AiOutlineDelete size={24} />
-        </span>
-      </div>
-      <CardMedia component="img" height="140" image={image} alt={username} />
-      <CardContent>
-        <Typography variant="h6" component="div">
-          {username}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-};
-
 export default UserList;
-
-const UserForm = (props) => {
-  const { fetchUsers } = props;
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    location: "",
-    contact: "",
-    image: "",
-  });
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const response = await axios.post("/users", { data: formData });
-      console.log(response.data);
-
-      localStorage.setItem("token", response.data.token);
-
-      setFormData({
-        username: "",
-        email: "",
-        password: "",
-        location: "",
-        contact: "",
-        image: "",
-      });
-
-      fetchUsers();
-    } catch (error) {
-      console.error(error.response.data);
-    }
-  };
-
-  return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-    >
-      <Container maxWidth="sm">
-        <Typography variant="h4" align="center" gutterBottom>
-          Welcome to DigiKick. Register Below!
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Contact"
-                name="contact"
-                type="tel"
-                value={formData.contact}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Image URL"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-              />
-            </Grid>
-          </Grid>
-          <center>
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              sx={{ mt: 2 }}
-            >
-              Submit
-            </Button>
-          </center>
-        </form>
-      </Container>
-    </Box>
-  );
-};
