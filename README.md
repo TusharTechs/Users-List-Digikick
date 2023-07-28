@@ -88,20 +88,21 @@ i) Install MongoDB on your machine by following the official installation guide 
 ii) Once MongoDB is installed, start the MongoDB server. The default port is 27017.
 
 3. Navigate to the project root directory and install the backend dependencies:
-### cd backend
-### npm install
+cd backend
+npm install
 
 4. Start the backend server:
-### node index.js
+5. node index.js
 
 The backend will start running at http://localhost:5000.
 
 5. In a new terminal, navigate to the frontend directory and install the frontend dependencies:
-### cd frontend
-### npm install
+cd frontend
+npm install
 
 6. Start the frontend development server:
-### npm start
+npm start
+
 The frontend will be accessible at http://localhost:3000.
 
 ### Note: Ensure you have both Node.js and npm installed on your machine before running the project.
